@@ -1,5 +1,6 @@
 import express from 'express';
 import 'dotenv/config';
+import DatabaseService from './services/databaseService';
 
 import healthcheckRoutes from './controllers/healthcheckController';
 import bookRoutes from './controllers/bookController';
@@ -17,3 +18,6 @@ app.listen(port, () => {
  */
 app.use('/healthcheck', healthcheckRoutes);
 app.use('/books', bookRoutes);
+
+const db = DatabaseService.getInstance();
+db.connect();
