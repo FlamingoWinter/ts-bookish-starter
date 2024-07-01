@@ -11,12 +11,23 @@ class DatabaseService {
     private DatabaseService() {
         void 0;
     }
+    public async createNewRequest(query: string) {
+        const request = await new Promise<Request>((resolve, reject) => {
+            const request = new Request(query, (error) => {
+                if (error) {
+                    reject(error);
+                }
+            });
+            resolve(request);
+        });
+        return request;
+    }
 
     static connectionConfiguration: ConnectionConfiguration = {
         authentication: {
             options: {
                 userName: 'bookishUser',
-                password: 'bookish_pwd',
+                password: process.env.BookishAdminDatabasePassword,
             },
             type: 'default',
         },
@@ -49,16 +60,10 @@ class DatabaseService {
     }
 
     public async executeQuery<T>(
-        query: string,
+        request: Request,
         rowParser: (queryResult: RowElement[]) => T,
     ): Promise<T[]> {
         return new Promise((resolve, reject) => {
-            const request = new Request(query, (error) => {
-                if (error) {
-                    reject(error);
-                }
-            });
-
             const parsedRows: T[] = [];
             request.on('row', (row) => {
                 parsedRows.push(rowParser(row));
