@@ -7,3 +7,5 @@ class Book {
         this.title = title;
     }
 }
+
+export default Book;

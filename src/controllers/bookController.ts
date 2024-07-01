@@ -1,12 +1,13 @@
 import { Router, Request, Response } from 'express';
 import DatabaseService from '../services/databaseService';
+import Book from '../models/book';
 
 class BookController {
     router: Router;
-    db: DatabaseService;
+    db: typeof DatabaseService;
 
     constructor() {
-        this.db = DatabaseService.getInstance();
+        this.db = DatabaseService;
 
         this.router = Router();
         this.router.get('/:id', this.getBook.bind(this));
@@ -33,14 +34,17 @@ class BookController {
     }
 
     async getAllBooks(req: Request, res: Response) {
-        const data = await this.db.executeQuery('SELECT * FROM author');
+        const data: Book[] = await this.db.executeQuery(
+            'SELECT * FROM book;',
+            (row): Book => {
+                return new Book(
+                    row.filter((x) => x.metadata.colName === 'isbn')[0].value,
+                    row.filter((x) => x.metadata.colName === 'title')[0].value,
+                );
+            },
+        );
 
-        // data.map((row) => {new Book()})
-
-        return res.status(500).json({
-            error: 'server_error',
-            error_description: 'Endpoint not implemented yet.',
-        });
+        return res.status(200).json(data);
     }
 }
 

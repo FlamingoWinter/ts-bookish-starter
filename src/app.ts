@@ -19,5 +19,4 @@ app.listen(port, () => {
 app.use('/healthcheck', healthcheckRoutes);
 app.use('/books', bookRoutes);
 
-const db = DatabaseService.getInstance();
-db.connect();
+DatabaseService.connect();

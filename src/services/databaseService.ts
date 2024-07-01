@@ -1,16 +1,15 @@
 import { Connection, ConnectionConfiguration, Request } from 'tedious';
-class DatabaseService {
-    static _instance: DatabaseService | null = null;
 
+interface RowElement {
+    value: any;
+    metadata: {
+        colName: string;
+    };
+}
+
+class DatabaseService {
     private DatabaseService() {
         void 0;
-    }
-
-    static getInstance() {
-        if (!this._instance) {
-            this._instance = new DatabaseService();
-        }
-        return this._instance;
     }
 
     static connectionConfiguration: ConnectionConfiguration = {
@@ -49,8 +48,10 @@ class DatabaseService {
         });
     }
 
-    //TODO: Refactor to have a callback function which handles the translation of the row data into the model class.
-    public async executeQuery<ReturnType>(query: string) {
+    public async executeQuery<T>(
+        query: string,
+        rowParser: (queryResult: RowElement[]) => T,
+    ): Promise<T[]> {
         return new Promise((resolve, reject) => {
             const request = new Request(query, (error) => {
                 if (error) {
@@ -58,21 +59,17 @@ class DatabaseService {
                 }
             });
 
-            const rows = [];
-            request.on('row', (record) => {
-                rows.push(
-                    record.map((element) => {
-                        return { [element.metadata.colName]: element.value };
-                    }),
-                );
+            const parsedRows: T[] = [];
+            request.on('row', (row) => {
+                parsedRows.push(rowParser(row));
             });
 
             request.on('requestCompleted', () => {
-                if (T === rows) resolve(rows);
+                resolve(parsedRows);
             });
 
             this.connection.execSql(request);
         });
     }
 }
-export default DatabaseService;
+export default new DatabaseService();

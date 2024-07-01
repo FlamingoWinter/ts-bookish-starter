@@ -9,3 +9,4 @@ class Authorship {
         this.book_isbn = book_isbn;
     }
 }
+export default Authorship;

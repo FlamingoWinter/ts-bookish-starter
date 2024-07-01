@@ -7,3 +7,4 @@ class Copy {
         this.isbn = isbn;
     }
 }
+export default Copy;

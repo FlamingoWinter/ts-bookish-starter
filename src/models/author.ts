@@ -1,5 +1,3 @@
-import { TYPES } from 'tedious';
-
 class Author {
     id: number;
     first_name: string;
@@ -11,3 +9,4 @@ class Author {
         this.surname = surname;
     }
 }
+export default Author;
