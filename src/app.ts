@@ -1,9 +1,9 @@
 import express from 'express';
 import 'dotenv/config';
-import DatabaseService from './services/databaseService';
+import DatabaseService from './services/database/databaseService';
 
-import healthcheckRoutes from './controllers/healthcheckController';
-import bookRoutes from './controllers/bookController';
+import healthcheckRoutes from './controllers/healthcheck/healthcheckController';
+import bookRoutes from './controllers/book/bookController';
 
 const port = process.env['PORT'] || 3000;
 

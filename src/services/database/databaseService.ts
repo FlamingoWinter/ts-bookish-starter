@@ -1,18 +1,21 @@
-import { Connection, ConnectionConfiguration, Request } from 'tedious';
+import { Connection, Request } from 'tedious';
+import databaseServiceConfig from './databaseServiceConfig';
 
-interface RowElement {
+interface Cell {
     value: any;
     metadata: {
         colName: string;
     };
 }
 
+type Row = Cell[];
+
 class DatabaseService {
-    private DatabaseService() {
-        void 0;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    private DatabaseService() {}
+
     public async createNewRequest(query: string) {
-        const request = await new Promise<Request>((resolve, reject) => {
+        return await new Promise<Request>((resolve, reject) => {
             const request = new Request(query, (error) => {
                 if (error) {
                     reject(error);
@@ -20,32 +23,16 @@ class DatabaseService {
             });
             resolve(request);
         });
-        return request;
     }
-
-    static connectionConfiguration: ConnectionConfiguration = {
-        authentication: {
-            options: {
-                userName: 'bookishUser',
-                password: process.env.BookishAdminDatabasePassword,
-            },
-            type: 'default',
-        },
-        server: 'GECKO',
-        options: {
-            database: 'bookish',
-            encrypt: true,
-            trustServerCertificate: true,
-            rowCollectionOnRequestCompletion: true,
-        },
-    };
 
     connection: Connection;
 
+    getProperty(row: Row, property: string) {
+        return row.filter((x) => x.metadata.colName === property)[0].value;
+    }
+
     public async connect() {
-        this.connection = new Connection(
-            DatabaseService.connectionConfiguration,
-        );
+        this.connection = new Connection(databaseServiceConfig);
         this.connection.connect();
         return new Promise<void>((resolve, reject) => {
             this.connection.on('connect', (error) => {
@@ -61,7 +48,7 @@ class DatabaseService {
 
     public async executeQuery<T>(
         request: Request,
-        rowParser: (queryResult: RowElement[]) => T,
+        rowParser: (queryResult: Row) => T,
     ): Promise<T[]> {
         return new Promise((resolve, reject) => {
             const parsedRows: T[] = [];
@@ -77,4 +64,7 @@ class DatabaseService {
         });
     }
 }
-export default new DatabaseService();
+
+const databaseService = new DatabaseService();
+
+export { Row, databaseService };
